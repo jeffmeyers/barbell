@@ -1,0 +1,169 @@
+<!-- Include Bootstrap CSS from CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Weight Buttons Section -->
+<div class="card mb-4 p-4 shadow-sm border-light rounded">
+  <h5 class="text-center mb-4">Select Weights (one side):</h5>
+  
+  <!-- KG Buttons Row (Responsive) -->
+  <div class="row justify-content-center mb-3">
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn kg btn btn-outline-primary btn-lg w-100" data-value-kgs="25">25KG</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn kg btn btn-outline-primary btn-lg w-100" data-value-kgs="20">20KG</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn kg btn btn-outline-primary btn-lg w-100" data-value-kgs="10">10KG</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn kg btn btn-outline-primary btn-lg w-100" data-value-kgs="5">5KG</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn kg btn btn-outline-primary btn-lg w-100" data-value-kgs="2.5">2.5KG</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn kg btn btn-outline-primary btn-lg w-100" data-value-kgs="1.25">1.25KG</button>
+    </div>
+  </div>
+
+  <!-- LB Buttons Row (Responsive) -->
+  <div class="row justify-content-center">
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn lb btn btn-outline-success btn-lg w-100" data-value-lbs="45">45LB</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn lb btn btn-outline-success btn-lg w-100" data-value-lbs="35">35LB</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn lb btn btn-outline-success btn-lg w-100" data-value-lbs="25">25LB</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn lb btn btn-outline-success btn-lg w-100" data-value-lbs="10">10LB</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn lb btn btn-outline-success btn-lg w-100" data-value-lbs="5">5LB</button>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <button class="weight-btn lb btn btn-outline-success btn-lg w-100" data-value-lbs="2.5">2.5LB</button>
+    </div>
+  </div>
+  
+  <p class="text-center mt-3 text-primary fs-4">
+    Current side total: <span id="sideTotal">0</span> LB
+  </p>
+</div>
+
+<!-- Control Buttons: Reset, Save, Next -->
+<div class="d-flex justify-content-center gap-3 mb-4">
+  <button id="resetSide" class="btn btn-warning btn-lg px-4">Reset Side</button>
+  <button id="saveWeight" class="btn btn-primary btn-lg px-4">Save Weight</button>
+  <button id="nextExercise" class="btn btn-secondary btn-lg px-4">Next Exercise</button>
+</div>
+<div class="text-center mb-4">
+  <small class="text-muted">
+    Total weight = bar (20KG) + 2 × side total.
+  </small>
+</div>
+
+<!-- Next Exercise Output and Copy Output -->
+<div class="card mb-4 p-4 shadow-sm border-light rounded">
+  <div class="mb-3">
+    <label for="exerciseOutput" class="form-label text-center w-100">Saved Exercises:</label>
+    <div id="exerciseOutput" class="fs-5 text-muted"></div>
+  </div>
+  <div class="text-center">
+    <button id="copyOutput" class="btn btn-info btn-lg px-4">Copy Output</button>
+  </div>
+</div>
+
+<!-- Saved Lift Totals List -->
+<div class="card p-4 shadow-sm border-light rounded">
+  <h5 class="mb-3 text-center">Saved Lift Totals (in pounds)</h5>
+  <ul id="savedList" class="list-group list-group-flush"></ul>
+</div>
+
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JavaScript -->
+<script>
+  const KG_TO_LB = 2.20462;
+  const BAR_WEIGHT_KG = 20;
+  const BAR_WEIGHT_LB = BAR_WEIGHT_KG * KG_TO_LB;
+
+  let currentSideTotal = 0;
+  const savedTotals = [];
+
+  const sideTotalEl = document.getElementById('sideTotal');
+  const savedListEl = document.getElementById('savedList');
+  const exerciseOutputEl = document.getElementById('exerciseOutput');
+
+  function updateSideTotalDisplay() {
+    sideTotalEl.textContent = currentSideTotal.toFixed(2);
+  }
+
+  document.querySelectorAll('.weight-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      let weightToAdd = 0;
+      if (this.dataset.valueKgs) {
+        weightToAdd = parseFloat(this.dataset.valueKgs) * KG_TO_LB;
+      } else if (this.dataset.valueLbs) {
+        weightToAdd = parseFloat(this.dataset.valueLbs);
+      }
+      currentSideTotal += weightToAdd;
+      updateSideTotalDisplay();
+    });
+  });
+
+  document.getElementById('resetSide').addEventListener('click', function () {
+    currentSideTotal = 0;
+    updateSideTotalDisplay();
+  });
+
+  document.getElementById('saveWeight').addEventListener('click', function () {
+    const totalLift = BAR_WEIGHT_LB + 2 * currentSideTotal;
+    const roundedLift = Math.floor(totalLift);
+    savedTotals.push(roundedLift);
+    addToSavedList(roundedLift);
+    currentSideTotal = 0;
+    updateSideTotalDisplay();
+  });
+
+  function addToSavedList(weight) {
+    const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+    const weightSpan = document.createElement('span');
+    weightSpan.textContent = weight + ' LB';
+
+    const duplicateBtn = document.createElement('button');
+    duplicateBtn.className = 'btn btn-sm btn-outline-secondary';
+    duplicateBtn.textContent = 'Save Again';
+    duplicateBtn.addEventListener('click', function () {
+      savedTotals.push(weight);
+      addToSavedList(weight);
+    });
+
+    li.appendChild(weightSpan);
+    li.appendChild(duplicateBtn);
+    savedListEl.appendChild(li);
+  }
+
+  document.getElementById('nextExercise').addEventListener('click', function () {
+    if (savedTotals.length === 0) {
+      exerciseOutputEl.textContent = 'No saved weights yet.';
+      return;
+    }
+    const formatted = savedTotals.join('-');
+    exerciseOutputEl.textContent = formatted;
+  });
+
+  document.getElementById('copyOutput').addEventListener('click', function () {
+    const textToCopy = exerciseOutputEl.textContent;
+    if (!textToCopy) return;
+    navigator.clipboard.writeText(textToCopy)
+      .then(() => alert('Copied output to clipboard!'))
+      .catch(() => alert('Failed to copy output.'));
+  });
+</script>
